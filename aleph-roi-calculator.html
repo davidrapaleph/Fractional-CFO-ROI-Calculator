@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aleph ROI Calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --black: #0d0d0d;
+  --white: #ffffff;
+  --surface: #f5f4f0;
+  --surface2: #eceae3;
+  --border: #d6d4cc;
+  --border-light: #e8e6df;
+  --text-primary: #0d0d0d;
+  --text-secondary: #5c5b55;
+  --text-muted: #9c9a90;
+  --accent: #1a44c4;
+  --accent-hover: #1538a8;
+  --accent-light: #eef1fb;
+  --green: #166f47;
+  --green-light: #eaf5ee;
+  --amber: #a85200;
+  --amber-light: #fef3e6;
+  --purple: #6d28d9;
+  --purple-light: #f3effe;
+  --teal: #0d7a6e;
+  --teal-light: #e6f7f5;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --font: 'DM Sans', sans-serif;
+  --mono: 'DM Mono', monospace;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--font);
+  background: var(--surface);
+  color: var(--text-primary);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* HEADER */
+.header {
+  background: var(--black);
+  height: 56px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 40px;
+  position: sticky; top: 0; z-index: 200;
+}
+.logo { display: flex; align-items: center; gap: 9px; }
+.logo-mark {
+  width: 24px; height: 24px; background: var(--accent);
+  border-radius: 5px; display: flex; align-items: center; justify-content: center;
+}
+.logo-mark svg { width: 12px; height: 12px; fill: white; }
+.logo-name { font-size: 17px; font-weight: 600; color: white; letter-spacing: -0.4px; }
+.header-label { font-size: 11px; font-weight: 500; color: rgba(255,255,255,0.35); letter-spacing: 0.08em; text-transform: uppercase; }
+
+/* HERO */
+.hero { background: var(--black); padding: 44px 40px 48px; }
+.hero-inner { max-width: 1120px; margin: 0 auto; }
+.hero h1 { font-size: 34px; font-weight: 500; color: white; letter-spacing: -1px; line-height: 1.2; margin-bottom: 10px; }
+.hero h1 em { font-style: normal; color: #6f9cf7; }
+.hero p { font-size: 14px; color: rgba(255,255,255,0.45); max-width: 480px; }
+
+/* LAYOUT */
+.page { max-width: 1120px; margin: 0 auto; padding: 32px 40px 80px; display: grid; grid-template-columns: 1fr 380px; gap: 24px; align-items: start; }
+
+/* CARDS */
+.card { background: var(--white); border: 1px solid var(--border-light); border-radius: var(--radius-xl); padding: 24px 26px; }
+.card + .card { margin-top: 16px; }
+
+/* SEC HEADS */
+.sec-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+.sec-title { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.09em; color: var(--text-muted); }
+.sec-badge { font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 20px; text-transform: uppercase; letter-spacing: 0.05em; }
+.badge-blue   { background: var(--accent-light); color: var(--accent); }
+.badge-green  { background: var(--green-light);  color: var(--green); }
+.badge-amber  { background: var(--amber-light);  color: var(--amber); }
+.badge-purple { background: var(--purple-light); color: var(--purple); }
+.badge-teal   { background: var(--teal-light);   color: var(--teal); }
+
+/* FIELDS */
+.field { margin-bottom: 14px; }
+.field:last-child { margin-bottom: 0; }
+.field label { display: block; font-size: 12px; font-weight: 500; color: var(--text-secondary); margin-bottom: 5px; }
+.field label .hint { font-weight: 400; color: var(--text-muted); margin-left: 3px; }
+.iw { display: flex; align-items: center; border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; background: white; transition: border-color 0.15s, box-shadow 0.15s; }
+.iw:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(26,68,196,0.1); }
+.iw .affix { padding: 0 10px; font-size: 12px; font-weight: 500; color: var(--text-muted); background: var(--surface); border-right: 1px solid var(--border); height: 36px; display: flex; align-items: center; flex-shrink: 0; white-space: nowrap; }
+.iw .suf { border-right: none; border-left: 1px solid var(--border); }
+.iw input { flex: 1; border: none; outline: none; padding: 0 11px; height: 36px; font-size: 13px; font-weight: 500; font-family: var(--mono); color: var(--text-primary); background: transparent; width: 0; min-width: 0; }
+.iw.readonly { background: var(--surface); }
+.iw.readonly input { color: var(--text-secondary); font-weight: 400; }
+input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
+.field-row  { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.field-row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+
+/* DIVIDER */
+.div { height: 1px; background: var(--border-light); margin: 18px 0; }
+
+/* CLIENT CALLOUT */
+.client-callout { background: linear-gradient(135deg, #0d1e5a 0%, #122e8a 100%); border-radius: var(--radius-xl); padding: 22px 26px; margin-bottom: 16px; }
+.client-callout-title { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.09em; color: rgba(255,255,255,0.45); margin-bottom: 16px; }
+.client-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.client-field label { display: block; font-size: 12px; font-weight: 500; color: rgba(255,255,255,0.6); margin-bottom: 5px; }
+.client-iw { display: flex; align-items: center; border: 1px solid rgba(255,255,255,0.15); border-radius: var(--radius-md); background: rgba(255,255,255,0.08); overflow: hidden; }
+.client-iw:focus-within { border-color: rgba(255,255,255,0.45); }
+.client-iw .affix { padding: 0 10px; font-size: 12px; font-weight: 500; color: rgba(255,255,255,0.35); background: rgba(255,255,255,0.06); border-right: 1px solid rgba(255,255,255,0.1); height: 36px; display: flex; align-items: center; }
+.client-iw .suf { border-right: none; border-left: 1px solid rgba(255,255,255,0.1); }
+.client-iw input { flex: 1; border: none; outline: none; padding: 0 11px; height: 36px; font-size: 13px; font-weight: 500; font-family: var(--mono); color: white; background: transparent; width: 0; min-width: 0; }
+
+/* TASK ROWS */
+.task-section { margin-bottom: 20px; }
+.task-section:last-child { margin-bottom: 0; }
+.task-section-label { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; color: var(--text-secondary); padding-bottom: 10px; margin-bottom: 10px; border-bottom: 1px solid var(--border-light); }
+.task-section-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+.task-row {
+  display: grid;
+  grid-template-columns: 20px 1fr 100px 60px 80px;
+  gap: 10px; align-items: center;
+  padding: 10px 12px; border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  transition: background 0.15s, border-color 0.15s, opacity 0.2s;
+  margin-bottom: 6px;
+}
+.task-row:last-child { margin-bottom: 0; }
+.task-row.active { background: var(--surface); border-color: var(--border-light); }
+.task-row.inactive { opacity: 0.4; }
+
+.task-check { width: 18px; height: 18px; border: 1.5px solid var(--border); border-radius: 4px; cursor: pointer; appearance: none; -webkit-appearance: none; flex-shrink: 0; transition: background 0.15s, border-color 0.15s; position: relative; }
+.task-check:checked { background: var(--accent); border-color: var(--accent); }
+.task-check:checked::after { content: ''; position: absolute; width: 4px; height: 7px; border: 1.5px solid white; border-top: none; border-left: none; transform: rotate(40deg) translate(3px, 1px); }
+
+.task-name { font-size: 13px; font-weight: 500; color: var(--text-primary); line-height: 1.3; }
+.task-name small { display: block; font-size: 11px; font-weight: 400; color: var(--text-muted); margin-top: 1px; }
+
+.task-inline { display: flex; align-items: center; gap: 5px; }
+.task-inline-input { flex: 1; min-width: 0; text-align: right; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 5px 8px; font-size: 13px; font-family: var(--mono); font-weight: 500; color: var(--text-primary); background: white; outline: none; transition: border-color 0.15s; }
+.task-inline-input:focus { border-color: var(--accent); }
+.task-inline-input:disabled { background: var(--surface); color: var(--text-muted); }
+.task-inline-label { font-size: 11px; color: var(--text-muted); white-space: nowrap; flex-shrink: 0; }
+
+.task-savings { font-size: 12px; font-weight: 600; font-family: var(--mono); color: var(--green); text-align: right; white-space: nowrap; }
+.task-savings.zero { color: var(--text-muted); font-weight: 400; }
+
+.col-header { display: grid; grid-template-columns: 20px 1fr 150px 90px; gap: 10px; padding: 0 12px; margin-bottom: 6px; }
+.col-header span { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-muted); }
+
+.task-section { margin-bottom: 20px; }
+.task-section:last-child { margin-bottom: 0; }
+.task-section-label { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; color: var(--text-secondary); padding-bottom: 10px; margin-bottom: 10px; border-bottom: 1px solid var(--border-light); }
+.task-section-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+.task-row { display: grid; grid-template-columns: 20px 1fr 150px 90px; gap: 10px; align-items: center; padding: 10px 12px; border-radius: var(--radius-md); border: 1px solid transparent; transition: background 0.15s, border-color 0.15s, opacity 0.2s; margin-bottom: 6px; }
+.task-row:last-child { margin-bottom: 0; }
+.task-row.active { background: var(--surface); border-color: var(--border-light); }
+.task-row.inactive { opacity: 0.4; }
+
+.task-check { width: 18px; height: 18px; border: 1.5px solid var(--border); border-radius: 4px; cursor: pointer; appearance: none; -webkit-appearance: none; flex-shrink: 0; transition: background 0.15s, border-color 0.15s; position: relative; }
+.task-check:checked { background: var(--accent); border-color: var(--accent); }
+.task-check:checked::after { content: ''; position: absolute; width: 4px; height: 7px; border: 1.5px solid white; border-top: none; border-left: none; transform: rotate(40deg) translate(3px, 1px); }
+
+.task-name { font-size: 13px; font-weight: 500; color: var(--text-primary); line-height: 1.3; }
+.task-name small { display: block; font-size: 11px; font-weight: 400; color: var(--text-muted); margin-top: 1px; }
+
+.task-inline { display: flex; align-items: center; gap: 5px; }
+.task-inline-input { flex: 1; min-width: 0; text-align: right; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 5px 8px; font-size: 13px; font-family: var(--mono); font-weight: 500; color: var(--text-primary); background: white; outline: none; transition: border-color 0.15s; }
+.task-inline-input:focus { border-color: var(--accent); }
+.task-inline-input:disabled { background: var(--surface); color: var(--text-muted); }
+.task-inline-label { font-size: 11px; color: var(--text-muted); white-space: nowrap; flex-shrink: 0; }
+
+.task-savings { font-size: 12px; font-weight: 600; font-family: var(--mono); color: var(--green); text-align: right; white-space: nowrap; }
+.task-savings.zero { color: var(--text-muted); font-weight: 400; }
+.col-header span:nth-child(3),
+.col-header span:nth-child(4),
+.col-header span:nth-child(5) { text-align: right; }
+
+/* RESULTS */
+.results-panel { position: sticky; top: 72px; }
+
+/* ROI HERO */
+.roi-hero { background: var(--black); border-radius: var(--radius-xl); padding: 24px; margin-bottom: 16px; overflow: hidden; position: relative; }
+.roi-hero::before { content: ''; position: absolute; top: -50px; right: -40px; width: 180px; height: 180px; border-radius: 50%; background: rgba(26,68,196,0.18); }
+.roi-client-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.09em; color: rgba(255,255,255,0.4); margin-bottom: 3px; }
+.roi-number { font-size: 52px; font-weight: 600; letter-spacing: -2px; line-height: 1; color: white; position: relative; z-index: 1; }
+.roi-number.neg { color: #ff9e96; }
+.roi-sub { font-size: 12px; color: rgba(255,255,255,0.4); margin-top: 3px; margin-bottom: 16px; }
+.roi-divider { height: 1px; background: rgba(255,255,255,0.1); margin-bottom: 16px; }
+.roi-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.roi-item .val { font-size: 17px; font-weight: 600; letter-spacing: -0.4px; color: white; font-family: var(--mono); }
+.roi-item .lbl { font-size: 10px; color: rgba(255,255,255,0.4); margin-top: 2px; }
+
+/* FIRM-WIDE */
+.firm-wide { background: linear-gradient(135deg, #0a3d2e 0%, #166f47 100%); border-radius: var(--radius-xl); padding: 22px 24px; margin-bottom: 16px; }
+.fw-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.09em; color: rgba(255,255,255,0.5); margin-bottom: 14px; }
+.fw-big { font-size: 38px; font-weight: 600; letter-spacing: -1.5px; color: white; line-height: 1; }
+.fw-big-label { font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 3px; margin-bottom: 14px; }
+.fw-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.fw-item { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius-md); padding: 10px 12px; }
+.fw-item .v { font-size: 16px; font-weight: 600; color: white; font-family: var(--mono); letter-spacing: -0.3px; }
+.fw-item .l { font-size: 10px; color: rgba(255,255,255,0.45); margin-top: 2px; }
+
+/* TOGGLE */
+
+/* IMPL */
+
+.footnote { font-size: 11px; color: var(--text-muted); margin-top: 12px; line-height: 1.5; }
+
+@keyframes slideUp { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+.card, .roi-hero, .firm-wide, .client-callout { animation: slideUp 0.3s ease both; }
+.card:nth-child(2) { animation-delay:0.04s; }
+.card:nth-child(3) { animation-delay:0.08s; }
+.card:nth-child(4) { animation-delay:0.12s; }
+
+@media (max-width: 900px) {
+  .page { grid-template-columns: 1fr; padding: 20px 20px 60px; }
+  .results-panel { position: static; }
+  .hero { padding: 28px 20px 32px; }
+  .hero h1 { font-size: 26px; }
+  .header { padding: 0 20px; }
+  .field-row3 { grid-template-columns: 1fr 1fr; }
+  .task-row { grid-template-columns: 20px 1fr 130px 80px; }
+  .col-header { grid-template-columns: 20px 1fr 130px 80px; }
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo">
+    <div class="logo-mark"><svg viewBox="0 0 12 12"><path d="M6 0.5L11.5 6L6 11.5L0.5 6Z"/></svg></div>
+    <span class="logo-name">Aleph</span>
+  </div>
+  <span class="header-label">Fractional CFO ROI Calculator</span>
+</header>
+
+<div class="hero">
+  <div class="hero-inner">
+    <h1>The ROI of Aleph for<br><em>your entire client portfolio</em></h1>
+    <p>Configure which tasks Aleph automates, then see savings per engagement — and multiplied across every client you serve.</p>
+  </div>
+</div>
+
+<div class="page">
+
+  <!-- ══ LEFT ══ -->
+  <div>
+
+    <!-- Firm & Portfolio Setup -->
+    <div class="client-callout">
+      <div class="client-callout-title">Firm &amp; Portfolio Setup</div>
+      <div class="client-fields">
+        <div class="client-field">
+          <label>Number of client engagements</label>
+          <div class="client-iw">
+            <input type="number" id="num-clients" value="10" min="1" max="500" step="1" oninput="calc()">
+            <div class="affix suf">clients</div>
+          </div>
+        </div>
+        <div class="client-field">
+          <label>Avg. annual analyst salary</label>
+          <div class="client-iw">
+            <div class="affix">$</div>
+            <input type="number" id="annual-cost" value="110000" min="0" step="1000" oninput="calc()">
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;gap:24px;">
+        <div>
+          <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:rgba(255,255,255,0.35);margin-bottom:2px;">Effective hourly rate</div>
+          <div style="font-size:20px;font-weight:600;color:white;font-family:var(--mono);letter-spacing:-0.5px;" id="hourly-rate-hero">$—</div>
+        </div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.3);line-height:1.5;">Based on salary ÷ 52 weeks ÷ 50 hrs/week.<br>Edit salary above to update.</div>
+      </div>
+    </div>
+
+    <!-- Task Savings -->
+    <div class="card">
+      <div class="sec-head">
+        <span class="sec-title">Time Saved per Task per Client</span>
+        <span class="sec-badge badge-green">Per engagement / month</span>
+      </div>
+      <p style="font-size:12px;color:var(--text-muted);margin-bottom:16px;">Toggle each task on or off and adjust the hours saved per month for your client's situation.</p>
+
+      <div class="col-header">
+        <span></span>
+        <span>Task</span>
+        <span style="text-align:right;">Hours Saved / Month</span>
+        <span style="text-align:right;">Saved / Month</span>
+      </div>
+
+      <div id="task-rows"></div>
+
+      <div class="footnote">* Savings = hrs/mo &times; hourly rate</div>
+    </div>
+
+    <!-- Aleph Cost -->
+    <div class="card">
+      <div class="sec-head">
+        <span class="sec-title">Aleph Subscription</span>
+        <span class="sec-badge badge-blue">Annual Cost</span>
+      </div>
+      <div class="field">
+        <label>Aleph annual subscription cost</label>
+        <div class="iw">
+          <div class="affix">$</div>
+          <input type="number" id="aleph-cost" value="60000" min="0" step="1000" oninput="calc()">
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /left -->
+
+  <!-- ══ RIGHT ══ -->
+  <div class="results-panel">
+
+    <!-- ROI per client -->
+    <div class="roi-hero">
+      <div class="roi-client-label">ROI — per client engagement</div>
+      <div class="roi-number" id="roi-display">—</div>
+      <div class="roi-sub" id="roi-sub">Toggle tasks to begin</div>
+      <div class="roi-divider"></div>
+      <div class="roi-row">
+        <div class="roi-item">
+          <div class="val" id="savings-per-client">$—</div>
+          <div class="lbl">Annual savings / client</div>
+        </div>
+        <div class="roi-item">
+          <div class="val" id="cost-per-client">$—</div>
+          <div class="lbl">Annual cost / client</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Firm-wide -->
+    <div class="firm-wide">
+      <div class="fw-label">Firm-wide impact across all clients</div>
+      <div class="fw-big" id="fw-savings">$—</div>
+      <div class="fw-big-label" id="fw-savings-label">Total annual savings</div>
+      <div class="fw-row">
+        <div class="fw-item">
+          <div class="v" id="fw-net">$—</div>
+          <div class="l">Net value (savings − cost)</div>
+        </div>
+        <div class="fw-item">
+          <div class="v" id="fw-hrs">—</div>
+          <div class="l">Hours reclaimed / month</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Breakdown -->
+    <div class="card">
+      <div class="sec-head">
+        <span class="sec-title">Savings Breakdown</span>
+        <span class="sec-badge badge-green">Annual</span>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr auto auto;gap:0 10px;padding-bottom:8px;margin-bottom:4px;border-bottom:1px solid var(--border-light);">
+        <span style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-muted);">Task</span>
+        <span style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-muted);text-align:right;white-space:nowrap;">Per client/mo</span>
+        <span style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-muted);text-align:right;white-space:nowrap;">All clients/mo</span>
+      </div>
+
+      <div id="breakdown-rows"></div>
+
+      <div class="div" style="margin:10px 0 8px;"></div>
+      <div style="display:grid;grid-template-columns:1fr auto auto;gap:0 10px;align-items:center;">
+        <span style="font-size:13px;font-weight:600;">Total monthly savings</span>
+        <span style="font-size:13px;font-weight:600;font-family:var(--mono);text-align:right;" id="bd-total-single">$0</span>
+        <span style="font-size:13px;font-weight:600;font-family:var(--mono);color:var(--green);text-align:right;" id="bd-total-all">$0</span>
+      </div>
+
+      <div class="footnote">* Hourly rate = annual cost ÷ (52 wks × hrs/wk).<br>Savings per task = hrs/mo × hourly rate × 12 months.</div>
+    </div>
+
+
+
+  </div><!-- /right -->
+</div><!-- /page -->
+
+<script>
+// ════════════════════════════════════════════════════════════════════
+//  BACKEND CONFIG — edit this section to customise the calculator
+//  before sending to clients. Each task has:
+//    on      – true = checked by default, false = unchecked
+//    name    – displayed task label
+//    desc    – small subtitle shown below the name
+//    section – group heading (tasks are grouped by this)
+//    hrs     – default hours saved per month (client can adjust)
+//    people  – default number of people affected (client can adjust)
+//    color   – dot colour used in the breakdown sidebar
+// ════════════════════════════════════════════════════════════════════
+const TASKS = [
+  // ── Data & Reporting ──────────────────────────────────────────────
+  { on:true,  name:'Manual data exports & consolidation',  desc:'Pulling from ERPs, CRMs, and HR systems',            section:'Data & Reporting',    hrs:1,    color:'#1a44c4' },
+  { on:true,  name:'Maintaining data mappings',            desc:'Keeping integrations & field mappings current',      section:'Data & Reporting',    hrs:0.5,  color:'#3a5fd4' },
+  { on:true,  name:'Building recurring reports',           desc:'Monthly/weekly financial packages & decks',          section:'Data & Reporting',    hrs:1,    color:'#6490e8' },
+  { on:true,  name:'Reduced financial statement review',   desc:'Faster review cycles with automated data checks',    section:'Data & Reporting',    hrs:0.25, color:'#4a72f0' },
+  { on:true,  name:'HRIS roster updates',                  desc:'Automated headcount & org chart syncing',            section:'Data & Reporting',    hrs:0.25, color:'#7aa0f5' },
+  { on:true,  name:'Entity consolidation',                   desc:'Consolidating financials across multiple entities',   section:'Data & Reporting',    hrs:0.5,  color:'#92b4f7' },
+  // ── Analysis ──────────────────────────────────────────────────────
+  { on:true,  name:'Variance analysis',                    desc:'Budget vs actuals, period-over-period commentary',   section:'Analysis',            hrs:1,    color:'#6d28d9' },
+  { on:true,  name:'Ad-hoc data exploration',              desc:'Answering one-off questions from clients quickly',   section:'Analysis',            hrs:1,    color:'#7c3aed' },
+  { on:true,  name:'Drill-down & root cause analysis',     desc:'Investigating anomalies and variances quickly',      section:'Analysis',            hrs:1,    color:'#9d5ef0' },
+  // ── AI Features ───────────────────────────────────────────────────
+  { on:true,  name:'AI variance narratives',               desc:'Auto-generated commentary & board-ready insights',   section:'AI Features',         hrs:2,    color:'#0d7a6e' },
+  // ── Client Presentation ───────────────────────────────────────────
+  { on:true,  name:'Prepare client dashboard',             desc:'Assembling and formatting client-facing dashboards', section:'Client Presentation', hrs:2,    color:'#b85c00' },
+  { on:true,  name:'Prepare client board slides',          desc:'Building board-ready presentation decks',            section:'Client Presentation', hrs:1,    color:'#d4720a' },
+];
+
+// Section dot colours — shown next to each section heading
+const SECTION_COLORS = {
+  'Data & Reporting':    '#1a44c4',
+  'Analysis':            '#6d28d9',
+  'AI Features':         '#0d7a6e',
+  'Client Presentation': '#b85c00',
+};
+// ════════════════════════════════════════════════════════════════════
+//  END OF BACKEND CONFIG
+// ════════════════════════════════════════════════════════════════════
+
+
+// ─── RENDER TASK ROWS ─────────────────────────────────────────────────────────
+// Groups tasks by section and renders card-style rows, exactly like v2.
+function renderTaskRows() {
+  const container = document.getElementById('task-rows');
+  if (!container) return;
+
+  // Group tasks by section, preserving order
+  const sections = [];
+  const seen = {};
+  TASKS.forEach(t => {
+    if (!seen[t.section]) { seen[t.section] = true; sections.push(t.section); }
+  });
+
+  let html = '';
+  sections.forEach(sec => {
+    const dotColor = SECTION_COLORS[sec] || '#888780';
+    html += `
+      <div class="task-section">
+        <div class="task-section-label">
+          <div class="task-section-dot" style="background:${dotColor}"></div>
+          ${sec}
+        </div>`;
+
+    TASKS.forEach((t, i) => {
+      if (t.section !== sec) return;
+      const activeClass = t.on ? 'active' : 'inactive';
+      html += `
+        <div class="task-row ${activeClass}" id="row-${i}">
+          <input type="checkbox" class="task-check" id="chk-${i}" ${t.on ? 'checked' : ''} onchange="toggleTask(${i})">
+          <div class="task-name">${t.name}<small>${t.desc}</small></div>
+          <div class="task-inline">
+            <input type="number" class="task-inline-input" id="hrs-${i}" value="${t.hrs}"
+              min="0" max="500" step="0.25" ${t.on ? '' : 'disabled'} oninput="calc()">
+            <span class="task-inline-label">hrs/mo</span>
+          </div>
+          <span class="task-savings${t.on ? '' : ' zero'}" id="sav-${i}">—</span>
+        </div>`;
+    });
+
+    html += `</div>`; // close task-section
+  });
+
+  container.innerHTML = html;
+}
+
+function toggleTask(i) {
+  const on = document.getElementById('chk-' + i).checked;
+  const row = document.getElementById('row-' + i);
+  row.classList.toggle('active', on);
+  row.classList.toggle('inactive', !on);
+  document.getElementById('hrs-' + i).disabled = !on;
+  calc();
+}
+
+// ─── HELPERS ─────────────────────────────────────────────────────────────────
+function v(id, fallback = 0) {
+  const el = document.getElementById(id);
+  if (!el) return fallback;
+  const n = parseFloat(el.value);
+  return isNaN(n) ? fallback : n;
+}
+function fmt(n) {
+  if (n === null || isNaN(n) || !isFinite(n)) return '—';
+  const abs = Math.round(Math.abs(n));
+  const s = '$' + abs.toLocaleString('en-US');
+  return n < 0 ? '(' + s + ')' : s;
+}
+function fmtX(n) {
+  if (!isFinite(n) || isNaN(n)) return '—';
+  return n.toFixed(1) + 'x';
+}
+function set(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = val;
+}
+
+// ─── CORE CALCULATION ─────────────────────────────────────────────────────────
+// hourly_rate      = annual_salary / (52 weeks × 50 hrs/week)
+// task_annual_sav  = hrs/mo × hourly_rate × 12
+// per_client_total = Σ active task savings
+// firm_total       = per_client_total × num_clients
+// cost_per_client  = aleph_cost / num_clients
+// ROI              = per_client_total / cost_per_client
+
+function calc() {
+  const annualCost = v('annual-cost', 110000);
+  const numClients = Math.max(1, Math.round(v('num-clients', 10)));
+  const alephCost  = v('aleph-cost', 60000);
+  const hourlyRate = annualCost / (52 * 50);
+
+  // Update hourly rate display
+  const hrHero = document.getElementById('hourly-rate-hero');
+  if (hrHero) hrHero.textContent = '$' + Math.round(hourlyRate).toLocaleString('en-US');
+
+  let perClientYear = 0;
+  let perClientHrsMo = 0;
+  const activeResults = [];
+
+  TASKS.forEach((t, i) => {
+    const on  = document.getElementById('chk-' + i)?.checked ?? false;
+    const hrs = on ? (parseFloat(document.getElementById('hrs-' + i)?.value) || 0) : 0;
+    const mthSav = hrs * hourlyRate;
+
+    const savEl = document.getElementById('sav-' + i);
+    if (savEl) {
+      savEl.textContent = (on && mthSav > 0) ? fmt(mthSav) : '—';
+      savEl.classList.toggle('zero', !on || mthSav === 0);
+    }
+
+    if (on && mthSav > 0) {
+      perClientYear  += mthSav * 12;
+      perClientHrsMo += hrs;
+      activeResults.push({ ...t, annSav: mthSav * 12, mthSav });
+    }
+  });
+
+  // No implementation savings — removed
+
+  // Firm-wide totals
+  const firmTotal     = perClientYear * numClients;
+  const costPerClient = alephCost / numClients;
+  const roi           = costPerClient > 0 ? perClientYear / costPerClient : null;
+  const firmNet       = firmTotal - alephCost;
+  const firmHrsMo     = perClientHrsMo * numClients;
+
+  // ROI hero
+  const roiEl = document.getElementById('roi-display');
+  if (roi !== null && isFinite(roi) && perClientYear > 0) {
+    roiEl.textContent = fmtX(roi);
+    roiEl.classList.toggle('neg', roi < 0);
+    set('roi-sub', roi >= 1
+      ? `Every $1 spent on Aleph returns $${roi.toFixed(2)} in savings`
+      : roi >= 0 ? 'Positive return — enable more tasks to improve ROI'
+      : 'Cost exceeds savings at current assumptions');
+  } else {
+    roiEl.textContent = '—';
+    set('roi-sub', 'Toggle tasks on the left to begin');
+    roiEl.classList.remove('neg');
+  }
+  set('savings-per-client', fmt(perClientYear));
+  set('cost-per-client',    fmt(costPerClient));
+
+  set('fw-savings', fmt(firmTotal));
+  document.getElementById('fw-savings-label').textContent =
+    `Total annual savings across ${numClients} client${numClients !== 1 ? 's' : ''}`;
+  set('fw-net', fmt(firmNet));
+  set('fw-hrs', Math.round(firmHrsMo).toLocaleString('en-US') + ' hrs');
+
+  // Breakdown sidebar
+  const bdEl = document.getElementById('breakdown-rows');
+  if (bdEl) {
+    const bdRows = [...activeResults];
+      bdEl.innerHTML = bdRows.length === 0
+      ? '<div style="padding:16px 0;font-size:13px;color:var(--text-muted);text-align:center;">Enable at least one task to see the breakdown</div>'
+      : bdRows.map(r => `
+          <div style="display:grid;grid-template-columns:1fr auto auto;gap:0 10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border-light);">
+            <div style="display:flex;align-items:center;gap:7px;">
+              <div style="width:7px;height:7px;border-radius:50%;background:${r.color};flex-shrink:0;"></div>
+              <span style="font-size:12px;color:var(--text-secondary);">${r.name}</span>
+            </div>
+            <span style="font-size:12px;font-family:var(--mono);color:var(--text-muted);text-align:right;">${fmt(r.mthSav)}</span>
+            <span style="font-size:12px;font-family:var(--mono);font-weight:600;color:var(--green);text-align:right;">${fmt(r.mthSav * numClients)}</span>
+          </div>`).join('');
+  }
+
+  set('bd-total-single', fmt(perClientYear / 12));
+  set('bd-total-all',    fmt(firmTotal / 12));
+}
+
+
+
+// ─── INIT ──────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  renderTaskRows();
+  calc();
+});
+</script>
+</body>
+</html>
