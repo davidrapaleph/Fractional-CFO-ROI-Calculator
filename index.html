@@ -235,16 +235,19 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
 
 <header class="header">
   <div class="logo">
-    <div class="logo-mark"><svg viewBox="0 0 12 12"><path d="M6 0.5L11.5 6L6 11.5L0.5 6Z"/></svg></div>
-    <span class="logo-name">Aleph</span>
+    <img src="https://logo.clearbit.com/getaleph.com" alt="Aleph" style="height:28px;width:auto;filter:brightness(0) invert(1);" onerror="this.style.display='none';document.getElementById('logo-fallback').style.display='flex';">
+    <div id="logo-fallback" style="display:none;align-items:center;gap:9px;">
+      <div class="logo-mark"><svg viewBox="0 0 12 12"><path d="M6 0.5L11.5 6L6 11.5L0.5 6Z"/></svg></div>
+      <span class="logo-name">Aleph</span>
+    </div>
   </div>
   <span class="header-label">Fractional CFO ROI Calculator</span>
 </header>
 
 <div class="hero">
   <div class="hero-inner">
-    <h1>The ROI of Aleph for<br><em>your entire client portfolio</em></h1>
-    <p>Configure which tasks Aleph automates, then see savings per engagement — and multiplied across every client you serve.</p>
+    <h1>See how Aleph can <em>streamline</em> your<br>monthly client responsibilities</h1>
+    <p>Select the tasks that apply, enter your hours saved, and see the impact across your entire client book.</p>
   </div>
 </div>
 
@@ -260,7 +263,7 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
         <div class="client-field">
           <label>Number of client engagements</label>
           <div class="client-iw">
-            <input type="number" id="num-clients" value="10" min="1" max="500" step="1" oninput="calc()">
+            <input type="number" id="num-clients" value="70" min="1" max="500" step="1" oninput="calc()">
             <div class="affix suf">clients</div>
           </div>
         </div>
@@ -311,7 +314,7 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
         <label>Aleph annual subscription cost</label>
         <div class="iw">
           <div class="affix">$</div>
-          <input type="number" id="aleph-cost" value="60000" min="0" step="1000" oninput="calc()">
+          <input type="number" id="aleph-cost" value="75000" min="0" step="1000" oninput="calc()">
         </div>
       </div>
     </div>
@@ -400,12 +403,12 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
 // ════════════════════════════════════════════════════════════════════
 const TASKS = [
   // ── Data & Reporting ──────────────────────────────────────────────
-  { on:true,  name:'Manual data exports & consolidation',  desc:'Pulling from ERPs, CRMs, and HR systems',            section:'Data & Reporting',    hrs:1,    color:'#1a44c4' },
-  { on:true,  name:'Maintaining data mappings',            desc:'Keeping integrations & field mappings current',      section:'Data & Reporting',    hrs:0.5,  color:'#3a5fd4' },
-  { on:true,  name:'Building recurring reports',           desc:'Monthly/weekly financial packages & decks',          section:'Data & Reporting',    hrs:1,    color:'#6490e8' },
   { on:true,  name:'Reduced financial statement review',   desc:'Faster review cycles with automated data checks',    section:'Data & Reporting',    hrs:0.25, color:'#4a72f0' },
+  { on:true,  name:'Manual data exports & consolidation',  desc:'Pulling from ERPs, CRMs, and HR systems',            section:'Data & Reporting',    hrs:1,    color:'#1a44c4' },
   { on:true,  name:'HRIS roster updates',                  desc:'Automated headcount & org chart syncing',            section:'Data & Reporting',    hrs:0.25, color:'#7aa0f5' },
-  { on:true,  name:'Entity consolidation',                   desc:'Consolidating financials across multiple entities',   section:'Data & Reporting',    hrs:0.5,  color:'#92b4f7' },
+  { on:true,  name:'Maintaining data mappings',            desc:'Keeping integrations & field mappings current',      section:'Data & Reporting',    hrs:0.5,  color:'#3a5fd4' },
+  { on:true,  name:'Entity consolidation',                 desc:'Consolidating financials across multiple entities',  section:'Data & Reporting',    hrs:0.5,  color:'#92b4f7' },
+  { on:true,  name:'Building recurring reports',           desc:'Monthly/weekly financial packages & decks',          section:'Data & Reporting',    hrs:1,    color:'#6490e8' },
   // ── Analysis ──────────────────────────────────────────────────────
   { on:true,  name:'Variance analysis',                    desc:'Budget vs actuals, period-over-period commentary',   section:'Analysis',            hrs:1,    color:'#6d28d9' },
   { on:true,  name:'Ad-hoc data exploration',              desc:'Answering one-off questions from clients quickly',   section:'Analysis',            hrs:1,    color:'#7c3aed' },
