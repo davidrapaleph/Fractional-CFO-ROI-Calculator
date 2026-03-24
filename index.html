@@ -158,8 +158,6 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
 .task-savings { font-size: 12px; font-weight: 600; font-family: var(--mono); color: var(--green); text-align: right; white-space: nowrap; }
 .task-savings.zero { color: var(--text-muted); font-weight: 400; }
 
-.col-header { display: grid; grid-template-columns: 20px 1fr 150px 90px; gap: 10px; padding: 0 12px; margin-bottom: 6px; }
-.col-header span { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-muted); }
 
 .task-section { margin-bottom: 20px; }
 .task-section:last-child { margin-bottom: 0; }
@@ -186,9 +184,6 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
 
 .task-savings { font-size: 12px; font-weight: 600; font-family: var(--mono); color: var(--green); text-align: right; white-space: nowrap; }
 .task-savings.zero { color: var(--text-muted); font-weight: 400; }
-.col-header span:nth-child(3),
-.col-header span:nth-child(4),
-.col-header span:nth-child(5) { text-align: right; }
 
 /* RESULTS */
 .results-panel { position: sticky; top: 72px; }
@@ -227,15 +222,67 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
 .card:nth-child(3) { animation-delay:0.08s; }
 .card:nth-child(4) { animation-delay:0.12s; }
 
+/* ── Tablet (≤900px): stack columns, keep task table readable ── */
 @media (max-width: 900px) {
-  .page { grid-template-columns: 1fr; padding: 20px 20px 60px; }
+  .page { grid-template-columns: 1fr; padding: 20px 20px 60px; gap: 16px; }
   .results-panel { position: static; }
   .hero { padding: 28px 20px 32px; }
   .hero h1 { font-size: 26px; }
   .header { padding: 0 20px; }
+  .header-label { display: none; }
   .field-row3 { grid-template-columns: 1fr 1fr; }
-  .task-row { grid-template-columns: 20px 1fr 130px 80px; }
-  .col-header { grid-template-columns: 20px 1fr 130px 80px; }
+  .client-fields { grid-template-columns: 1fr 1fr; }
+  .task-row { grid-template-columns: 20px 1fr 110px 80px; gap: 8px; }
+  .roi-row { grid-template-columns: 1fr 1fr; }
+  .fw-row { grid-template-columns: 1fr 1fr; }
+}
+
+/* ── Mobile (≤600px): single column everything ── */
+@media (max-width: 600px) {
+  .page { padding: 16px 16px 60px; gap: 12px; }
+  .hero { padding: 24px 16px 28px; }
+  .hero h1 { font-size: 22px; letter-spacing: -0.5px; }
+  .hero p { font-size: 13px; }
+  .header { padding: 0 16px; height: 50px; }
+
+  /* Cards */
+  .card { padding: 18px 16px; border-radius: var(--radius-lg); }
+  .card + .card { margin-top: 12px; }
+  .client-callout { padding: 18px 16px; border-radius: var(--radius-lg); margin-bottom: 12px; }
+  .firm-wide { padding: 18px 16px; border-radius: var(--radius-lg); }
+  .roi-hero { padding: 18px 16px; border-radius: var(--radius-lg); }
+
+  /* Firm setup: stack inputs vertically on small screens */
+  .client-fields { grid-template-columns: 1fr; gap: 10px; }
+  .field-row3 { grid-template-columns: 1fr; }
+  .field-row { grid-template-columns: 1fr; }
+
+  /* ROI hero number smaller */
+  .roi-number { font-size: 40px; }
+  .roi-row { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .roi-item .val { font-size: 14px; }
+
+  /* Firm-wide panel */
+  .fw-big { font-size: 28px; }
+  .fw-row { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .fw-item .v { font-size: 13px; }
+
+  /* Task rows: tighten up, drop hrs label, shrink inputs */
+  .col-header { grid-template-columns: 20px 1fr 90px 70px; gap: 6px; padding: 0 8px; }
+  .col-header span { font-size: 9px; }
+  .task-row { grid-template-columns: 20px 1fr 90px 70px; gap: 6px; padding: 8px 8px; }
+  .task-name { font-size: 12px; }
+  .task-name small { font-size: 10px; }
+  .task-inline-input { font-size: 12px; padding: 4px 6px; }
+  .task-inline-label { display: none; }
+  .task-savings { font-size: 11px; }
+  .task-section-label { font-size: 11px; }
+
+  /* Breakdown table columns */
+  #breakdown-rows > div { grid-template-columns: 1fr auto auto !important; }
+
+  /* Hourly rate callout */
+  #hourly-rate-hero { font-size: 16px; }
 }
 </style>
 </head>
@@ -295,13 +342,6 @@ input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer
         <span class="sec-badge badge-green">Per engagement / month</span>
       </div>
       <p style="font-size:12px;color:var(--text-muted);margin-bottom:16px;">Toggle each task on or off and adjust the hours saved per month for your client's situation.</p>
-
-      <div class="col-header">
-        <span></span>
-        <span>Task</span>
-        <span style="text-align:right;">Hours Saved / Month</span>
-        <span style="text-align:right;">Saved / Month</span>
-      </div>
 
       <div id="task-rows"></div>
 
@@ -456,7 +496,9 @@ function renderTaskRows() {
       <div class="task-section">
         <div class="task-section-label">
           <div class="task-section-dot" style="background:${dotColor}"></div>
-          ${sec}
+          <span style="flex:1;">${sec}</span>
+          <span style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-muted);min-width:110px;text-align:right;padding-right:4px;">Hours Saved / Mo</span>
+          <span style="font-size:9px;font-weight:600;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-muted);min-width:80px;text-align:right;">$ of Labor Saved / mo</span>
         </div>`;
 
     TASKS.forEach((t, i) => {
